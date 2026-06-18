@@ -316,12 +316,12 @@ const doDialogAction = async () => {
 
   idle.showIdle = true;
 
-  if (!projectModel.value.isGroup) {
+  if (!projectModel.value.isGroup && selectedSbom.value) {
     const approvableSpdx = {
       spdxkey: '',
       versionkey: '',
     } as ApprovableSPDXDto;
-    approvableSpdx.spdxkey = selectedSbom.value?._key ?? '';
+    approvableSpdx.spdxkey = selectedSbom.value._key;
     approvableSpdx.versionkey = selectedChannel.value?._key ?? '';
     await projectService.updateApprovableSpdx(approvableSpdx, projectModel.value._key);
   }
@@ -354,8 +354,13 @@ const isEitherFutureFoss = computed(() => {
 const canGenerateFoss = computed(() => {
   const rdConfirmationCondition = vehicle.value ? !isRdConfirmationMissing.value : true;
   const futureFossCondition = isEitherFutureFoss.value && fossVersion.value === 'default' ? !isWarned.value : true;
+  const noSbomLegacyCondition = !(isNoSbomNoFossWarning.value && fossVersion.value === 'legacy');
   return (
-    !isDeniedOrUnasserted.value && rdConfirmationCondition && futureFossCondition && selectedProjects.value?.length > 0
+    !isDeniedOrUnasserted.value &&
+    rdConfirmationCondition &&
+    futureFossCondition &&
+    noSbomLegacyCondition &&
+    selectedProjects.value?.length > 0
   );
 });
 
